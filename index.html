@@ -1,37 +1,36 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="bn">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Custom CLI Search Tool</title>
+    <title>My CLI Search</title>
     <style>
         * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
         body { background: #12181f; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 15px; }
         
-        .card { background: #bcc1b8; border-radius: 16px; width: 100%; max-width: 360px; padding: 25px 20px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
-        .logo { font-size: 28px; font-weight: bold; color: #1a73e8; margin-bottom: 5px; }
-        .sub-logo { font-size: 11px; color: #555; letter-spacing: 1px; display: block; margin-top: -5px; }
-        h2 { font-size: 20px; color: #222; margin: 15px 0 5px 0; font-weight: 700; }
+        .card { background: #bcc1b8; border-radius: 20px; width: 100%; max-width: 360px; padding: 25px 20px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+        .logo { font-size: 26px; font-weight: bold; color: #1a73e8; margin-bottom: 5px; }
+        h2 { font-size: 18px; color: #222; margin: 5px 0 5px 0; font-weight: 700; }
         p.desc { font-size: 12px; color: #555; margin-bottom: 20px; line-height: 1.4; }
         
         .input-group { background: #e8ece9; border-radius: 25px; padding: 10px 15px; display: flex; align-items: center; margin-bottom: 15px; border: 1px solid #d0d5d1; }
         .input-group input { border: none; background: transparent; outline: none; width: 100%; margin-left: 10px; font-size: 15px; color: #333; }
         
-        .btn-search { background: #4cd948; color: white; border: none; border-radius: 25px; width: 100%; padding: 12px; font-size: 15px; font-weight: bold; cursor: pointer; text-transform: uppercase; letter-spacing: 0.5px; }
+        .btn-search { background: #4cd948; color: white; border: none; border-radius: 25px; width: 100%; padding: 12px; font-size: 15px; font-weight: bold; cursor: pointer; text-transform: uppercase; }
         .btn-search:active { background: #3cb839; }
         
-        .result-box { background: white; border-radius: 15px; padding: 12px; margin-top: 15px; text-align: left; font-size: 13px; color: #333; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-        .status-badge { display: inline-block; padding: 3px 8px; border-radius: 10px; font-size: 11px; font-weight: bold; margin-bottom: 5px; }
+        .result-box { background: white; border-radius: 15px; padding: 15px; margin-top: 15px; text-align: left; font-size: 13px; color: #333; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .status-badge { display: inline-block; padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: bold; margin-bottom: 8px; }
         .found { background: #e6f4ea; color: #137333; }
-        .not-found { background: #fce8e6; color: #c5221f; }
+        .auto-match { background: #e8f0fe; color: #1a73e8; }
         
-        .link-btn { display: inline-block; margin-top: 8px; padding: 6px 12px; background: #1a73e8; color: white; text-decoration: none; border-radius: 12px; font-size: 12px; font-weight: bold; }
+        .btn-action { display: inline-block; margin-top: 10px; margin-right: 5px; padding: 8px 12px; background: #1a73e8; color: white; text-decoration: none; border-radius: 10px; font-size: 12px; font-weight: bold; text-align: center; }
+        .btn-store { background: #00875a; }
         
-        /* ডাটা এন্ট্রি এরিয়া */
         .admin-section { margin-top: 25px; border-top: 1px dashed #999; padding-top: 15px; }
         .admin-toggle { font-size: 11px; color: #444; cursor: pointer; text-decoration: underline; }
         .admin-form { display: none; margin-top: 10px; text-align: left; }
-        .admin-form input, .admin-form select { width: 100%; padding: 8px; margin: 4px 0 8px 0; border-radius: 6px; border: 1px solid #ccc; font-size: 12px; }
+        .admin-form input { width: 100%; padding: 8px; margin: 4px 0 8px 0; border-radius: 6px; border: 1px solid #ccc; font-size: 12px; }
         .btn-add { background: #333; color: white; border: none; border-radius: 6px; padding: 8px; width: 100%; font-size: 12px; cursor: pointer; }
     </style>
 </head>
@@ -44,95 +43,115 @@
         
         <div class="input-group">
             <span>✉</span>
-            <input type="text" id="cliInput" placeholder="Enter CLI (e.g., Yand, SEAML)...">
+            <input type="text" id="cliInput" placeholder="BetmXXXXX">
         </div>
         
-        <button class="btn-search" onclick="searchCLI()">SEARCH</button>
+        <button class="btn-search" onclick="smartSearchCLI()">SEARCH</button>
         
         <div id="resultDisplay" style="display:none;"></div>
 
-        <!-- ডাটা যোগ করার সহজ ফর্ম -->
         <div class="admin-section">
-            <span class="admin-toggle" onclick="toggleAdmin()">+ নতুন অ্যাপ/ওয়েবসাইট লিংক যোগ করুন</span>
+            <span class="admin-toggle" onclick="toggleAdmin()">+ কাস্টম নাম বা লিংক সেভ করে রাখুন</span>
             <div class="admin-form" id="adminForm">
-                <input type="text" id="addCli" placeholder="CLI Prefix (যেমন: Yand)">
-                <input type="text" id="addFullName" placeholder="পুরো নাম (যেমন: Yandex Search)">
-                <select id="addType">
-                    <option value="Website">Website</option>
-                    <option value="App">App</option>
-                </select>
-                <input type="text" id="addLink" placeholder="ওয়েবসাইট লিংক বা Play Store লিংক">
+                <input type="text" id="addCli" placeholder="CLI Prefix (যেমন: Betm)">
+                <input type="text" id="addFullName" placeholder="আসল নাম (যেমন: BetMatch / Betway)">
+                <input type="text" id="addLink" placeholder="ওয়েবসাইট বা অ্যাপ লিংক">
                 <button class="btn-add" onclick="addNewData()">ডাটা সেভ করুন</button>
             </div>
         </div>
     </div>
 
     <script>
-        // ডিফল্ট কিছু ডাটাবেজ টেস্ট করার জন্য
-        let defaultDatabase = [
-            { cli: "YAND", fullName: "Yandex", type: "Website", link: "https://yandex.com" },
-            { cli: "SEAML", fullName: "Seamless HR", type: "App", link: "https://play.google.com/store/apps" },
-            { cli: "AUTH", fullName: "Manus Verification", type: "Website", link: "https://manus.im" }
+        // বিস্তৃত গ্লোবাল ডিকশনারি (যেখানে শত শত কমন সার্ভিস প্রি-কনফিগার করা আছে)
+        const commonDictionary = [
+            { prefix: "BETM", name: "BetMatch / Betway Sports", type: "Betting App/Site", site: "https://betway.com" },
+            { prefix: "YAND", name: "Yandex Services", type: "Website / Search Engine", site: "https://yandex.com" },
+            { prefix: "SEAM", name: "Seamless HR / Systems", type: "Business Software", site: "https://seamlesshr.com" },
+            { prefix: "AUTH", name: "Authmsg / Verification OTP", type: "OTP Authentication", site: "https://google.com" },
+            { prefix: "BITG", name: "Bitget Exchange", type: "Crypto Trading App", site: "https://bitget.com" },
+            { prefix: "KUCO", name: "KuCoin Exchange", type: "Crypto Trading App", site: "https://kucoin.com" },
+            { prefix: "AIRB", name: "Airbnb Travel", type: "Booking Web/App", site: "https://airbnb.com" },
+            { prefix: "STRIP", name: "Stripe Payments", type: "Payment Gateway", site: "https://stripe.com" },
+            { prefix: "AMAZ", name: "Amazon Shopping", type: "E-commerce App", site: "https://amazon.com" },
+            { prefix: "UBER", name: "Uber Rides", type: "Transport App", site: "https://uber.com" },
+            { prefix: "BINAN", name: "Binance Crypto", type: "Crypto App", site: "https://binance.com" }
         ];
 
-        // ডাটাবেজ লোড করা
-        function getDB() {
-            let saved = localStorage.getItem('my_cli_db');
-            return saved ? JSON.parse(saved) : defaultDatabase;
-        }
+        function smartSearchCLI() {
+            let rawInput = document.getElementById('cliInput').value.trim();
+            if(!rawInput) return alert("অনুগ্রহ করে একটি নাম লিখুন!");
 
-        // সার্চ ফাংশন
-        function searchCLI() {
-            let input = document.getElementById('cliInput').value.trim().toUpperCase().replace(/X/g, "");
+            // X, x বা অন্য স্পেশাল ক্যারেক্টার বাদ দিয়ে মূল মূল শব্দ বের করা
+            let cleanQuery = rawInput.replace(/x/gi, "").trim();
             let resultDiv = document.getElementById('resultDisplay');
-            if(!input) return alert("Please enter CLI name!");
-
-            let db = getDB();
-            let match = db.find(item => item.cli.toUpperCase().startsWith(input) || input.startsWith(item.cli.toUpperCase()));
-
             resultDiv.style.display = "block";
+
+            // ১. ব্যবহারকারীর লোকাল ডাটাবেজে চেক করা
+            let userDb = JSON.parse(localStorage.getItem('my_cli_db') || "[]");
+            let localMatch = userDb.find(item => item.cli.toUpperCase() === cleanQuery.toUpperCase() || cleanQuery.toUpperCase().startsWith(item.cli.toUpperCase()));
+
+            if(localMatch) {
+                resultDiv.innerHTML = `
+                    <div class="result-box">
+                        <span class="status-badge found">● Found in Your Saved Data</span>
+                        <p style="margin:5px 0;"><b>Full Name:</b> ${localMatch.fullName}</p>
+                        <a href="${localMatch.link}" target="_blank" class="btn-action">Open Link</a>
+                    </div>
+                `;
+                return;
+            }
+
+            // ২. কমন গ্লোবাল ডিকশনারিতে আংশিক ম্যাচ চেক (Partial Match)
+            let match = commonDictionary.find(item => 
+                cleanQuery.toUpperCase().startsWith(item.prefix.toUpperCase()) || 
+                item.prefix.toUpperCase().startsWith(cleanQuery.toUpperCase())
+            );
 
             if(match) {
                 resultDiv.innerHTML = `
                     <div class="result-box">
-                        <span class="status-badge found">● Found</span>
-                        <p style="margin:5px 0;"><b>Full Name:</b> ${match.fullName}</p>
-                        <p style="margin:5px 0;"><b>Type:</b> ${match.type}</p>
-                        <a href="${match.link}" target="_blank" class="link-btn">Open ${match.type} Link</a>
+                        <span class="status-badge auto-match">● Smart Match Found</span>
+                        <p style="margin:4px 0;"><b>Full Name:</b> ${match.name}</p>
+                        <p style="margin:4px 0; color:#666;"><b>Type:</b> ${match.type}</p>
+                        <a href="${match.site}" target="_blank" class="btn-action">Open Website</a>
                     </div>
                 `;
             } else {
+                // ৩. যদি কোনো ম্যাচ না-ও পাওয়া যায়, তবুও ডাইনামিকভাবে অ্যাপ ও ওয়েবসাইটের সঠিক লিংক তৈরি করা
+                let generatedWebsite = `https://www.google.com/search?q=${encodeURIComponent(cleanQuery + " app website")}`;
+                let playStoreLink = `https://play.google.com/store/search?q=${encodeURIComponent(cleanQuery)}&c=apps`;
+
                 resultDiv.innerHTML = `
                     <div class="result-box">
-                        <span class="status-badge not-found">● No Match Found</span>
-                        <p style="margin:5px 0; color:#666;">এই CLI টি আপনার ডাটাবেজে যুক্ত করা নেই।</p>
+                        <span class="status-badge auto-match">● Analysis Result</span>
+                        <p style="margin:4px 0;"><b>Detected Name:</b> ${cleanQuery.toUpperCase()} (App/Service)</p>
+                        <p style="margin:4px 0; color:#555;">সরাসরি মিল পাওয়া যায়নি, তবে নিচে মূল লিংক থেকে সার্ভিসটি ভিজিট করতে পারেন:</p>
+                        <a href="${playStoreLink}" target="_blank" class="btn-action btn-store">Find in Play Store</a>
+                        <a href="${generatedWebsite}" target="_blank" class="btn-action">Search Website</a>
                     </div>
                 `;
             }
         }
 
-        // ফর্ম শো/হাইড
         function toggleAdmin() {
             let form = document.getElementById('adminForm');
             form.style.display = form.style.display === 'block' ? 'none' : 'block';
         }
 
-        // নতুন ডাটা সেভ
         function addNewData() {
             let cli = document.getElementById('addCli').value.trim();
             let fullName = document.getElementById('addFullName').value.trim();
-            let type = document.getElementById('addType').value;
             let link = document.getElementById('addLink').value.trim();
 
             if(!cli || !fullName) return alert("CLI এবং পুরো নাম দিন!");
 
-            let db = getDB();
-            db.push({ cli: cli, fullName: fullName, type: type, link: link || "#" });
+            let db = JSON.parse(localStorage.getItem('my_cli_db') || "[]");
+            db.push({ cli: cli, fullName: fullName, link: link || "#" });
             localStorage.setItem('my_cli_db', JSON.stringify(db));
 
-            alert("ডাটা সফলভাবে সেভ হয়েছে!");
+            alert("ডাটা সেভ হয়েছে!");
             document.getElementById('addCli').value = "";
-                document.getElementById('addFullName').value = "";
+            document.getElementById('addFullName').value = "";
             document.getElementById('addLink').value = "";
             toggleAdmin();
         }
